@@ -7,6 +7,7 @@
 
 module display_timings #(
 	// default 640x480
+	parameter CORDW   = 10,           // sx & sy size
 	parameter HACTIVE = 640,
 	parameter HFP     = 16,
 	parameter HSYNC   = 96,
@@ -18,24 +19,24 @@ module display_timings #(
 	) (
     input  wire logic clk_pix,          // pixel clock
     input  wire logic rst,              // reset
-    output      logic [9:0] sx,         // horizontal screen position
-    output      logic [9:0] sy,         // vertical screen position
+    output      logic [CORDW-1:0] sx,   // horizontal screen position
+    output      logic [CORDW-1:0] sy,   // vertical screen position
     output      logic hsync,            // horizontal sync
     output      logic vsync,            // vertical sync
     output      logic de                // data enable (low in blanking interval)
     );
 
     // horizontal timings
-    localparam HA_END = HACTIVE;         // end of active pixels
+    localparam HA_END = HACTIVE - 1;     // end of active pixels
     localparam HS_STA = HA_END + HFP;    // sync starts after front porch
     localparam HS_END = HS_STA + HSYNC;  // sync ends
-    localparam LINE   = HS_END + HBP - 1; // last pixel on line (after back porch)
+    localparam LINE   = HS_END + HBP;    // last pixel on line (after back porch)
 
     // vertical timings
-    localparam VA_END = VACTIVE;         // end of active pixels
+    localparam VA_END = VACTIVE - 1;     // end of active pixels
     localparam VS_STA = VA_END + VFP;    // sync starts after front porch
     localparam VS_END = VS_STA + VSYNC;  // sync ends
-    localparam SCREEN = VS_END + VBP -1; // last line on screen (after back porch)
+    localparam SCREEN = VS_END + VBP;    // last line on screen (after back porch)
 
     always_comb begin
         hsync = ~(sx >= HS_STA && sx < HS_END);  // invert: hsync polarity is negative
